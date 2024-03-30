@@ -10,10 +10,13 @@ function route($requestMethod, $urlList, $requestData, $connect) {
     }
 
     $personId = $requestData->body->personId;
+    $surname = $requestData->body->surname;
+    $name = $requestData->body->name;
+    $patronymic = $requestData->body->patronymic;
     $role = $requestData->body->role;
     $login = $requestData->body->login;
     $password = $requestData->body->password;
-
+    
     if (executeQuery($connect, "SELECT id FROM person WHERE id = ?", "i", $personId)->num_rows === 0) {
         sendJsonResponse(404, ['error' => 'Person ID does not exist']);
     }
@@ -28,7 +31,9 @@ function route($requestMethod, $urlList, $requestData, $connect) {
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-    $insertSuccess = executeQuery($connect, "INSERT INTO users (person_id, role, login, password) VALUES (?, ?, ?, ?)", "isss", $personId, $role, $login, $passwordHash);
+    $insertSuccess = executeQuery($connect, 
+    "INSERT INTO users (person_id, surname, name, patronymic, role, login, password) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    "issssss", $personId, $surname, $name, $patronymic, $role, $login, $passwordHash);
     
     if (!$insertSuccess) {
         sendJsonResponse(500, ['error' => 'Could not insert user', 'db_error' => $connect->error]);
