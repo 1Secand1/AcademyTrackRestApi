@@ -39,7 +39,7 @@ function executeQuery($connect, $query, $types = '', ...$params) {
         return;
     }
   
-    $stmt = $conтов nect->prepare($query);
+    $stmt = $connect->prepare($query);
     if (!$stmt) {
         sendJsonResponse(500, ['error' => 'Failed to prepare statement', 'db_error' => $connect->error]);
         return;
