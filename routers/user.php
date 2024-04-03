@@ -23,14 +23,14 @@ function route($requestMethod, $urlList, $requestData, $connect) {
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-    $insertSuccess = executeQuery($connect, 
+    $insertionResult = executeQuery($connect, 
     "INSERT INTO users (surname, name, patronymic, role, login, password) VALUES (?, ?, ?, ?, ?, ?)",
     "ssssss", $surname, $name, $patronymic, $role, $login, $passwordHash);
     
-    if (!$insertSuccess) {
-        sendJsonResponse(500, ['error' => 'Could not insert user', 'db_error' => $connect->error]);
-    } else {
+    if ($insertionResult) {
         sendJsonResponse(201, ['status' => 'success']);
+    } else {
+        sendJsonResponse(500, ['error' => 'Could not insert user', 'db_error' => $connect->error]);
     }
 }
 

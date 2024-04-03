@@ -33,26 +33,32 @@ function getData($method){
     return $data;
 }
 
-function executeQuery($connect, $query, $types, ...$params) {
-  if (!$connect) {
-      sendJsonResponse(500, ['error' => 'Database connection error']);
-  }
-
-  $stmt = $connect->prepare($query);
-  if (!$stmt) {
-      sendJsonResponse(500, ['error' => 'Failed to prepare statement', 'db_error' => $connect->error]);
-  }
+function executeQuery($connect, $query, $types = '', ...$params) {
+    if (!$connect) {
+        sendJsonResponse(500, ['error' => 'Database connection error']);
+        return;
+    }
   
-  $stmt->bind_param($types, ...$params);
-  if (!$stmt->execute()) {
-      sendJsonResponse(500, ['error' => 'Failed to execute statement', 'db_error' => $stmt->error]);
-  }
-
-  if (strtoupper(substr($query, 0, 6)) === 'SELECT') {
-      return $stmt->get_result();
-  } else {
-      return $stmt->affected_rows > 0;
-  }
+    $stmt = $conтов nect->prepare($query);
+    if (!$stmt) {
+        sendJsonResponse(500, ['error' => 'Failed to prepare statement', 'db_error' => $connect->error]);
+        return;
+    }
+    
+    if ($types) {
+        $stmt->bind_param($types, ...$params);
+    }
+    
+    if (!$stmt->execute()) {
+        sendJsonResponse(500, ['error' => 'Failed to execute statement', 'db_error' => $stmt->error]);
+        return;
+    }
+  
+    if (strtoupper(substr($query, 0, 6)) === 'SELECT') {
+        return $stmt->get_result();
+    } else {
+        return $stmt->affected_rows > 0;
+    }
 }
 
 function sendJsonResponse($status, $message) {

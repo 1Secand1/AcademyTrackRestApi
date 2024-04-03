@@ -14,8 +14,8 @@ function route($requestMethod, $urlList, $requestData, $connect) {
 
     $result = executeQuery($connect, 
      "SELECT 
-        subjects.name AS subject_name, 
-        groups.group_name AS group_name
+        subjects.name AS subjectName, 
+        groups.group_code AS groupCode
       FROM 
         teacher_group_subject
       JOIN subjects 

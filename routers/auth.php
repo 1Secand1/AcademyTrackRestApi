@@ -18,7 +18,7 @@ function route($requestMethod, $urlList, $requestData, $connect) {
     if ($user && password_verify($password, $user['password'])) {
         
         $userId = $user['id'];
-        $token = bin2hex(random_bytes(100)); // Генерируем безопасный токен
+        $token = bin2hex(random_bytes(100)); 
 
         $stmt = $connect->prepare("INSERT INTO tokens (user_id, value) VALUES (?, ?)");
         $stmt->bind_param("is", $userId, $token);
