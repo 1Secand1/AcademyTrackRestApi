@@ -36,13 +36,13 @@ function route($requestMethod, $urlList, $requestData, $connect) {
             $groups = [];
             while ($row = $groupsData->fetch_assoc()) {
                 $groups[] = [
-                    'codeGroupe' => $row['group_code'],
+                    'groupCode' => $row['group_code'],
                     'yearOfEntry' => $row['year_of_entry'],
                     'yearOfIssue' => $row['year_of_issue'],
                 ];
             }
 
-            sendJsonResponse(200, ['groups' => $groups]);
+            sendJsonResponse(200, $groups);
         break;
 
         default:

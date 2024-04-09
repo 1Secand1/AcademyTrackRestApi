@@ -1,5 +1,5 @@
 <?php
-$connect = mysqli_connect('localhost', 'REST_API', 'restapipassword', 'study');
+$connect = mysqli_connect('localhost', 'root', 'root', 'academytrack');
 
 if (!$connect ) {
   http_response_code(500);

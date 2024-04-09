@@ -11,37 +11,35 @@ function route($requestMethod, $urlList, $requestData, $connect) {
 
     switch ($requestMethod) {
         case 'POST':
-            $surname = $requestData->body->surname;
             $name = $requestData->body->name;
+            $surname = $requestData->body->surname;
             $patronymic = $requestData->body->patronymic;
             $codeGroupe = $requestData->body->codeGroupe;
             
-            $userId = executeQuery($connect, "SELECT id FROM users WHERE surname = ? AND name = ? AND patronymic = ?", "sss", $surname, $name, $patronymic)->fetch_assoc()['id'];
+            $userId = executeQuery($connect, 
+            "SELECT user_id FROM students WHERE surname = ? AND name = ? AND patronymic = ?", "sss", 
+            $surname, $name, $patronymic)->fetch_assoc()['user_id'];
 
-            if (!$userId) {
+            if (is_null(!$userId)) {
                 sendJsonResponse(404, ['error' => 'User not found']);
             }
 
-            $userExistsResult = executeQuery($connect, "SELECT user_id FROM students WHERE user_id = ?", "i", $userId);
             
-            if ($userExistsResult && $userExistsResult->num_rows > 0) {
-                sendJsonResponse(409, ['error' => 'This user already has a group']);
-            }
+            $groupIdResult = executeQuery($connect, "SELECT id FROM groups WHERE group_code = ?", "s", $codeGroupe);
             
-            $groupResult = executeQuery($connect, "SELECT id FROM groups WHERE group_code = ?", "s", $codeGroupe);
-            
-            if (!$groupResult) {
+            if (!$groupIdResult) {
                 sendJsonResponse(500, ['error' => 'An error occurred while fetching the group id']);
             }
             
-            $groupData = $groupResult->fetch_assoc();
-            if (!$groupData) {
+            $groupId = $groupIdResult->fetch_assoc()['id'];
+            if (!$groupId) {
                 sendJsonResponse(404, ['error' => 'Group not found']);
             }
             
-            $group_id = $groupData['id'];
-            
-            $insertionResult = executeQuery($connect, "INSERT INTO students(user_id, group_id) VALUES (?, ?)", "ii", $userId, $group_id);
+            $insertionResult = executeQuery($connect, 
+            "INSERT INTO students(name, surname, patronymic, group_id) 
+            VALUES (?, ?, ?, ?)", "sssi", 
+            $name, $surname, $patronymic, $groupId);
             
             if ($insertionResult) {
                 sendJsonResponse(201, ['status' => 'success']);
@@ -53,19 +51,17 @@ function route($requestMethod, $urlList, $requestData, $connect) {
         case 'GET':
             $query = 
                 "SELECT 
-                    users.id AS userId,
-                    users.surname,
-                    users.name,
-                    users.patronymic,
+                    students.surname,
+                    students.name,
+                    students.patronymic,
                     groups.group_code AS groupCode,
                     groups.year_of_entry AS yearOfEntry,
                     groups.year_of_issue AS yearOfIssue
                 FROM 
                     students
-                JOIN users ON students.user_id = users.id
                 JOIN groups ON students.group_id = groups.id";
         
-            $filter = $requestData->parameters["filter"] ?? '';
+            $filter = $requestData->parameters["groupCode"] ?? '';
             if (!empty($filter)) {
                 $query .= " WHERE groups.group_code = ?";
                 $result = executeQuery($connect, $query, 's', $filter);
@@ -77,7 +73,6 @@ function route($requestMethod, $urlList, $requestData, $connect) {
             if ($result) {
                 while ($row = $result->fetch_assoc()) {
                     $students[] = [
-                        'userId' => $row['userId'],
                         'surname' => $row['surname'],
                         'name' => $row['name'],
                         'patronymic' => $row['patronymic'],
@@ -88,7 +83,7 @@ function route($requestMethod, $urlList, $requestData, $connect) {
                 }
             }
         
-            sendJsonResponse(200, ['students' => $students]);
+            sendJsonResponse(200, $students);
         break;
 
         default:
