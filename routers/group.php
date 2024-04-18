@@ -16,7 +16,8 @@ function route($requestMethod, $urlList, $requestData, $connect) {
             $yearOfIssue = $requestData->body->yearOfIssue;
             
             if (executeQuery($connect, "SELECT group_code FROM groups WHERE group_code = ?", "s", $codeGroupe)->num_rows > 0) {
-                sendJsonResponse(409, ['error' => 'A groupe with this codeGroupe already exists']);
+                sendJsonResponse(409, 
+                ['error' => 'A groupe with this codeGroupe already exists']);
             }
             
             $insertionResult = executeQuery($connect,
