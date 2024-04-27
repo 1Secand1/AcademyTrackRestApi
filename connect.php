@@ -1,5 +1,5 @@
 <?php
-$connect = mysqli_connect('localhost', 'root', 'root', 'academytrack');
+$connect = mysqli_connect('db', 'root', 'example', 'academytrack');
 
 if (!$connect ) {
   http_response_code(500);
